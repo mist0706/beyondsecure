@@ -1,0 +1,9 @@
+version: '3.8'
+
+services:
+  beyondsecure:
+    build: .
+    container_name: beyondsecure
+    ports:
+      - "8080:80"
+    restart: unless-stopped
