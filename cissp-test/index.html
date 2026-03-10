@@ -1,0 +1,972 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CISSP Knowledge Assessment</title>
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #0f172a;
+            color: #e2e8f0;
+            line-height: 1.6;
+        }
+        h1 { color: #38bdf8; border-bottom: 2px solid #334155; padding-bottom: 10px; }
+        h2 { color: #a5b4fc; margin-top: 30px; font-size: 1.2em; }
+        .domain { 
+            background: #1e293b; 
+            border-radius: 12px; 
+            padding: 20px; 
+            margin-bottom: 20px;
+            border: 1px solid #334155;
+        }
+        .question {
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #0f172a;
+            border-radius: 8px;
+        }
+        .question-num {
+            font-weight: bold;
+            color: #38bdf8;
+            margin-bottom: 8px;
+        }
+        .question-text { margin-bottom: 12px; }
+        .options { display: flex; flex-direction: column; gap: 8px; }
+        .option {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px;
+            background: #1e293b;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .option:hover { background: #334155; }
+        .option input { margin: 0; accent-color: #38bdf8; width: 18px; height: 18px; }
+        .option.correct { background: #166534; border: 2px solid #22c55e; }
+        .option.incorrect { background: #991b1b; border: 2px solid #ef4444; }
+        .confidence {
+            margin-top: 12px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .confidence label { color: #94a3b8; font-size: 0.9em; }
+        .confidence input[type="range"] {
+            width: 150px;
+            accent-color: #a855f7;
+        }
+        .confidence-value {
+            background: #334155;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+        textarea {
+            width: 100%;
+            background: #1e293b;
+            border: 1px solid #334155;
+            color: #e2e8f0;
+            border-radius: 6px;
+            padding: 10px;
+            font-size: 1em;
+            resize: vertical;
+            min-height: 60px;
+        }
+        textarea:focus { outline: 2px solid #38bdf8; }
+        .btn {
+            background: linear-gradient(135deg, #38bdf8, #818cf8);
+            color: #0f172a;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 8px;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(56, 189, 248, 0.3);
+        }
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .results {
+            background: #1e293b;
+            border-radius: 12px;
+            padding: 25px;
+            margin-top: 30px;
+            display: none;
+        }
+        .results h3 { color: #38bdf8; margin-top: 0; }
+        .score-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-top: 15px;
+        }
+        .score-item {
+            background: #0f172a;
+            padding: 12px;
+            border-radius: 6px;
+            display: flex;
+            justify-content: space-between;
+        }
+        .score-item.weak { border-left: 3px solid #ef4444; }
+        .score-item.strong { border-left: 3px solid #22c55e; }
+        .weak-domains { margin-top: 20px; padding: 15px; background: #7f1d1d; border-radius: 8px; }
+        .progress-bar {
+            height: 8px;
+            background: #334155;
+            border-radius: 4px;
+            margin-top: 20px;
+            overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #38bdf8, #a855f7);
+            width: 0%;
+            transition: width 0.3s;
+        }
+        .nav {
+            position: sticky;
+            top: 0;
+            background: #0f172a;
+            padding: 15px 0;
+            border-bottom: 1px solid #334155;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .timer {
+            font-size: 1.2em;
+            color: #fbbf24;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <h1>🦞 CISSP Knowledge Assessment</h1>
+    <p style="color: #94a3b8;">40 questions across 8 domains • Take your time • Results at the end</p>
+    
+    <div class="nav">
+        <div class="progress-bar" style="flex: 1; margin-right: 20px;">
+            <div class="progress-fill" id="progress"></div>
+        </div>
+        <div class="timer" id="timer">00:00</div>
+    </div>
+
+    <form id="assessment">
+        <!-- Domain 1 -->
+        <div class="domain">
+            <h2>Domain 1: Security and Risk Management</h2>
+            
+            <div class="question">
+                <div class="question-num">Question 1</div>
+                <div class="question-text">Which of the following best describes the purpose of a Business Impact Analysis (BIA)?</div>
+                <div class="options">
+                    <label class="option"><input type="radio" name="q1" value="A"> A) To identify all threats and vulnerabilities in the organization</label>
+                    <label class="option"><input type="radio" name="q1" value="B"> B) To determine the criticality of business functions and the impact of downtime</label>
+                    <label class="option"><input type="radio" name="q1" value="C"> C) To create a risk mitigation strategy for all identified risks</label>
+                    <label class="option"><input type="radio" name="q1" value="D"> D) To document the technical architecture of security controls</label>
+                </div>
+                <div class="confidence">
+                    <label>Confidence:</label>
+                    <input type="range" name="c1" min="1" max="5" value="3">
+                    <span class="confidence-value">3</span>
+                </div>
+            </div>
+
+            <div class="question">
+                <div class="question-num">Question 2</div>
+                <div class="question-text">What is the PRIMARY purpose of due care in information security?</div>
+                <div class="options">
+                    <label class="option"><input type="radio" name="q2" value="A"> A) To demonstrate that reasonable steps were taken to prevent harm</label>
+                    <label class="option"><input type="radio" name="q2" value="B"> B) To transfer risk to a third party</label>
+                    <label class="option"><input type="radio" name="q2" value="C"> C) To eliminate all security risks</label>
+                    <label class="option"><input type="radio" name="q2" value="D"> D) To document compliance requirements</label>
+                </div>
+                <div class="confidence">
+                    <label>Confidence:</label>
+                    <input type="range" name="c2" min="1" max="5" value="3">
+                    <span class="confidence-value">3</span>
+                </div>
+            </div>
+
+            <div class="question">
+                <div class="question-num">Question 3</div>
+                <div class="question-text">Which risk treatment strategy involves accepting the potential impact and budgeting for it?</div>
+                <div class="options">
+                    <label class="option"><input type="radio" name="q3" value="A"> A) Risk mitigation</label>
+                    <label class="option"><input type="radio" name="q3" value="B"> B) Risk transference</label>
+                    <label class="option"><input type="radio" name="q3" value="C"> C) Risk avoidance</label>
+                    <label class="option"><input type="radio" name="q3" value="D"> D) Risk acceptance</label>
+                </div>
+                <div class="confidence">
+                    <label>Confidence:</label>
+                    <input type="range" name="c3" min="1" max="5" value="3">
+                    <span class="confidence-value">3</span>
+                </div>
+            </div>
+
+            <div class="question">
+                <div class="question-num">Question 4</div>
+                <div class="question-text">What is the PRIMARY responsibility of senior management regarding information security?</div>
+                <div class="options">
+                    <label class="option"><input type="radio" name="q4" value="A"> A) Implementing technical controls</label>
+                    <label class="option"><input type="radio" name="q4" value="B"> B) Setting policy and demonstrating commitment</label>
+                    <label class="option"><input type="radio" name="q4" value="C"> C) Conducting penetration testing</label>
+                    <label class="option"><input type="radio" name="q4" value="D"> D) Managing incident response</label>
+                </div>
+                <div class="confidence">
+                    <label>Confidence:</label>
+                    <input type="range" name="c4" min="1" max="5" value="3">
+                    <span class="confidence-value">3</span>
+                </div>
+            </div>
+
+            <div class="question">
+                <div class="question-num">Question 5</div>
+                <div class="question-text">Which of the following describes defense in depth?</div>
+                <div class="options">
+                    <label class="option"><input type="radio" name="q5" value="A"> A) A single strong security control</label>
+                    <label class="option"><input type="radio" name="q5" value="B"> B) Layered security controls across multiple domains</label>
+                    <label class="option"><input type="radio" name="q5" value="C"> C) Security through obscurity</label>
+                    <label class="option"><input type="radio" name="q5" value="D"> D) Perimeter-based security only</label>
+                </div>
+                <div class="confidence">
+                    <label>Confidence:</label>
+                    <input type="range" name="c5" min="1" max="5" value="3">
+                    <span class="confidence-value">3</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Domain 2 -->
+        <div class="domain">
+            <h2>Domain 2: Asset Security</h2>
+            
+            <div class="question">
+                <div class="question-num">Question 6</div>
+                <div class="question-text">What is the PRIMARY purpose of data classification?</div>
+                <div class="options">
+                    <label class="option"><input type="radio" name="q6" value="A"> A) To encrypt all organizational data</label>
+                    <label class="option"><input type="radio" name="q6" value="B"> B) To ensure appropriate protection based on sensitivity and value</label>
+                    <label class="option"><input type="radio" name="q6" value="C"> C) To reduce storage costs</label>
+                    <label class="option"><input type="radio" name="q6" value="D"> D) To comply with GDPR only</label>
+                </div>
+                <div class="confidence">
+                    <label>Confidence:</label>
+                    <input type="range" name="c6" min="1" max="5" value="3">
+                    <span class="confidence-value">3</span>
+                </div>
+            </div>
+
+            <div class="question">
+                <div class="question-num">Question 7</div>
+                <div class="question-text">What is the difference between due diligence and due care?</div>
+                <textarea name="q7" placeholder="Type your answer..."></textarea>
+                <div class="confidence">
+                    <label>Confidence:</label>
+                    <input type="range" name="c7" min="1" max="5" value="3">
+                    <span class="confidence-value">3</span>
+                </div>
+            </div>
+
+            <div class="question">
+                <div class="question-num">Question 8</div>
+                <div class="question-text">Which phase of the data lifecycle involves ensuring data is properly disposed of?</div>
+                <div class="options">
+                    <label class="option"><input type="radio" name="q8" value="A"> A) Creation</label>
+                    <label class="option"><input type="radio" name="q8" value="B"> B) Storage</label>
+                    <label class="option"><input type="radio" name="q8" value="C"> C) Disposal</label>
+                    <label class="option"><input type="radio" name="q8" value="D"> D) Retention</label>
+                </div>
+                <div class="confidence">
+                    <label>Confidence:</label>
+                    <input type="range" name="c8" min="1" max="5" value="3">
+                    <span class="confidence-value">3</span>
+                </div>
+            </div>
+
+            <div class="question">
+                <div class="question-num">Question 9</div>
+                <div class="question-text">What is the PRIMARY goal of remanence removal?</div>
+                <div class="options">
+                    <label class="option"><input type="radio" name="q9" value="A"> A) To improve system performance</label>
+                    <label class="option"><input type="radio" name="q9" value="B"> B) To ensure data cannot be recovered from media</label>
+                    <label class="option"><input type="radio" name="q9" value="C"> C) To comply with retention policies</label>
+                    <label class="option"><input type="radio" name="q9" value="D"> D) To backup data securely</label>
+                </div>
+                <div class="confidence">
+                    <label>Confidence:</label>
+                    <input type="range" name="c9" min="1" max="5" value="3">
+                    <span class="confidence-value">3</span>
+                </div>
+            </div>
+
+            <div class="question">
+                <div class="question-num">Question 10</div>
+                <div class="question-text">Who is ultimately responsible for data security in an organization?</div>
+                <div class="options">
+                    <label class="option"><input type="radio" name="q10" value="A"> A) The CISO</label>
+                    <label class="option"><input type="radio" name="q10" value="B"> B) Data owners</label>
+                    <label class="option"><input type="radio" name="q10" value="C"> C) Senior management</label>
+                    <label class="option"><input type="radio" name="q10" value="D"> D) The IT department</label>
+                </div>
+                <div class="confidence">
+                    <label>Confidence:</label>
+                    <input type="range" name="c10" min="1" max="5" value="3">
+                    <span class="confidence-value">3</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Domain 3 -->
+        <div class="domain">
+            <h2>Domain 3: Security Architecture and Engineering</h2>
+            
+            <div class="question">
+                <div class="question-num">Question 11</div>
+                <div class="question-text">Which security model enforces "no read up, no write down"?</div>
+                <div class="options">
+                    <label class="option"><input type="radio" name="q11" value="A"> A) Bell-LaPadula</label>
+                    <label class="option"><input type="radio" name="q11" value="B"> B) Biba</label>
+                    <label class="option"><input type="radio" name="q11" value="C"> C) Clark-Wilson</label>
+                    <label class="option"><input type="radio" name="q11" value="D"> D) Brewer-Nash</label>
+                </div>
+                <div class="confidence">
+                    <label>Confidence:</label>
+                    <input type="range" name="c11" min="1" max="5" value="3">
+                    <span class="confidence-value">3</span>
+                </div>
+            </div>
+
+            <div class="question">
+                <div class="question-num">Question 12</div>
+                <div class="question-text">What is the PRIMARY security concern with IoT devices?</div>
+                <div class="options">
+                    <label class="option"><input type="radio" name="q12" value="A"> A) High cost</label>
+                    <label class="option"><input type="radio" name="q12" value="B"> B) Limited processing power for security controls</label>
+                    <label class="option"><input type="radio" name="q12" value="C"> C) Difficult to install</label>
+                    <label class="option"><input type="radio" name="q12" value="D"> D) Proprietary connectors</label>
+                </div>
+                <div class="confidence">
+                    <label>Confidence:</label>
+                    <input type="range" name="c12" min="1" max="5" value="3">
+                    <span class="confidence-value">3</span>
+                </div>
+            </div>
+
+            <div class="question">
+                <div class="question-num">Question 13</div>
+                <div class="question-text">In a distributed system, which cryptographic technique ensures data integrity without encryption?</div>
+                <div class="options">
+                    <label class="option"><input type="radio" name="q13" value="A"> A) Hashing</label>
+                    <label class="option"><input type="radio" name="q13" value="B"> B) Symmetric encryption</label>
+                    <label class="option"><input type="radio" name="q13" value="C"> C) Asymmetric encryption</label>
+                    <label class="option"><input type="radio" name="q13" value="D"> D) Steganography</label>
+                </div>
+                <div class="confidence">
+                    <label>Confidence:</label>
+                    <input type="range" name="c13" min="1" max="5" value="3">
+                    <span class="confidence-value">3</span>
+                </div>
+            </div>
+
+            <div class="question">
+                <div class="question-num">Question 14</div>
+                <div class="question-text">What type of cryptography does RSA use?</div>
+                <div class="options">
+                    <label class="option"><input type="radio" name="q14" value="A"> A) Symmetric</label>
+                    <label class="option"><input type="radio" name="q14" value="B"> B) Asymmetric</label>
+                    <label class="option"><input type="radio" name="q14" value="C"> C) Hashing</label>
+                    <label class="option"><input type="radio" name="q14" value="D"> D) Stream cipher</label>
+                </div>
+                <div class="confidence">
+                    <label>Confidence:</label>
+                    <input type="range" name="c14" min="1" max="5" value="3">
+                    <span class="confidence-value">3</span>
+                </div>
+            </div>
+
+            <div class="question">
+                <div class="question-num">Question 15</div>
+                <div class="question-text">What is the PRIMARY purpose of a Trusted Platform Module (TPM)?</div>
+                <div class="options">
+                    <label class="option"><input type="radio" name="q15" value="A"> A) Network monitoring</label>
+                    <label class="option"><input type="radio" name="q15" value="B"> B) Hardware-based cryptographic key management</label>
+                    <label class="option"><input type="radio" name="q15" value="C"> C) Virus detection</label>
+                    <label class="option"><input type="radio" name="q15" value="D"> D) Email encryption</label>
+                </div>
+                <div class="confidence">
+                    <label>Confidence:</label>
+                    <input type="range" name="c15" min="1" max="5" value="3">
+                    <span class="confidence-value">3</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Domain 4 -->
+        <div class="domain">
+            <h2>Domain 4: Communication and Network Security</h2>
+            
+            <div class="question">
+                <div class="question-num">Question 16</div>
+                <div class="question-text">Which OSI layer is responsible for routing?</div>
+                <div class="options">
+                    <label class="option"><input type="radio" name="q16" value="A"> A) Layer 2 (Data Link)</label>
+                    <label class="option"><input type="radio" name="q16" value="B"> B) Layer 3 (Network)</label>
+                    <label class="option"><input type="radio" name="q16" value="C"> C) Layer 4 (Transport)</label>
+                    <label class="option"><input type="radio" name="q16" value="D"> D) Layer 7 (Application)</label>
+                </div>
+                <div class="confidence">
+                    <label>Confidence:</label>
+                    <input type="range" name="c16" min="1" max="5" value="3">
+                    <span class="confidence-value">3</span>
+                </div>
+            </div>
+
+            <div class="question">
+                <div class="question-num">Question 17</div>
+                <div class="question-text">What is the PRIMARY difference between TCP and UDP?</div>
+                <div class="options">
+                    <label class="option"><input type="radio" name="q17" value="A"> A) TCP is faster than UDP</label>
+                    <label class="option"><input type="radio" name="q17" value="B"> B) TCP is connection-oriented; UDP is connectionless</label>
+                    <label class="option"><input type="radio" name="q17" value="C"> C) UDP provides encryption; TCP does not</label>
+                    <label class="option"><input type="radio" name="q17" value="D"> D) TCP uses ports; UDP does not</label>
+                </div>
+                <div class="confidence">
+                    <label>Confidence:</label>
+                    <input type="range" name="c17" min="1" max="5" value="3">
+                    <span class="confidence-value">3</span>
+                </div>
+            </div>
+
+            <div class="question">
+                <div class="question-num">Question 18</div>
+                <div class="question-text">Which protocol provides secure remote access over port 22?</div>
+                <div class="options">
+                    <label class="option"><input type="radio" name="q18" value="A"> A) Telnet</label>
+                    <label class="option"><input type="radio" name="q18" value="B"> B) SSH</label>
+                    <label class="option"><input type="radio" name="q18" value="C"> C) RDP</label>
+                    <label class="option"><input type="radio" name="q18" value="D"> D) FTPS</label>
+                </div>
+                <div class="confidence">
+                    <label>Confidence:</label>
+                    <input type="range" name="c18" min="1" max="5" value="3">
+                    <span class="confidence-value">3</span>
+                </div>
+            </div>
+
+            <div class="question">
+                <div class="question-num">Question 19</div>
+                <div class="question-text">What is the PRIMARY purpose of a DMZ in network architecture?</div>
+                <div class="options">
+                    <label class="option"><input type="radio" name="q19" value="A"> A) To host internal databases</label>
+                    <label class="option"><input type="radio" name="q19" value="B"> B) To provide a buffer zone for publicly accessible services</label>
+                    <label class="option"><input type="radio" name="q19" value="C"> C) To encrypt all network traffic</label>
+                    <label class="option"><input type="radio" name="q19" value="D"> D) To prevent all external access</label>
+                </div>
+                <div class="confidence">
+                    <label>Confidence:</label>
+                    <input type="range" name="c19" min="1" max="5" value="3">
+                    <span class="confidence-value">3</span>
+                </div>
+            </div>
+
+            <div class="question">
+                <div class="question-num">Question 20</div>
+                <div class="question-text">Which VPN protocol operates at Layer 2?</div>
+                <div class="options">
+                    <label class="option"><input type="radio" name="q20" value="A"> A) IPSec</label>
+                    <label class="option"><input type="radio" name="q20" value="B"> B) SSL/TLS</label>
+                    <label class="option"><input type="radio" name="q20" value="C"> C) PPTP</label>
+                    <label class="option"><input type="radio" name="q20" value="D"> D) L2TP</label>
+                </div>
+                <div class="confidence">
+                    <label>Confidence:</label>
+                    <input type="range" name="c20" min="1" max="5" value="3">
+                    <span class="confidence-value">3</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Domain 5 -->
+        <div class="domain">
+            <h2>Domain 5: Identity and Access Management</h2>
+            
+            <div class="question">
+                <div class="question-num">Question 21</div>
+                <div class="question-text">What are the three factors of authentication?</div>
+                <div class="options">
+                    <label class="option"><input type="radio" name="q21" value="A"> A) Something you know, something you have, something you are</label>
+                    <label class="option"><input type="radio" name="q21" value="B"> B) Username, password, PIN</label>
+                    <label class="option"><input type="radio" name="q21" value="C"> C) Biometric, token, smart card</label>
+                    <label class="option"><input type="radio" name="q21" value="D"> D) Encryption, hashing, certificate</label>
+                </div>
+                <div class="confidence">
+                    <label>Confidence:</label>
+                    <input type="range" name="c21" min="1" max="5" value="3">
+                    <span class="confidence-value">3</span>
+                </div>
+            </div>
+
+            <div class="question">
+                <div class="question-num">Question 22</div>
+                <div class="question-text">What is the PRIMARY benefit of Single Sign-On (SSO)?</div>
+                <div class="options">
+                    <label class="option"><input type="radio" name="q22" value="A"> A) Increased security complexity</label>
+                    <label class="option"><input type="radio" name="q22" value="B"> B) Improved user convenience and reduced password fatigue</label>
+                    <label class="option"><input type="radio" name="q22" value="C"> C) Elimination of all authentication requirements</label>
+                    <label class="option"><input type="radio" name="q22" value="D"> D) Mandatory biometric authentication</label>
+                </div>
+                <div class="confidence">
+                    <label>Confidence:</label>
+                    <input type="range" name="c22" min="1" max="5" value="3">
+                    <span class="confidence-value">3</span>
+                </div>
+            </div>
+
+            <div class="question">
+                <div class="question-num">Question 23</div>
+                <div class="question-text">In Role-Based Access Control (RBAC), what determines a user's permissions?</div>
+                <div class="options">
+                    <label class="option"><input type="radio" name="q23" value="A"> A) Their individual identity</label>
+                    <label class="option"><input type="radio" name="q23" value="B"> B) Their assigned role(s)</label>
+                    <label class="option"><input type="radio" name="q23" value="C"> C) The time of day</label>
+                    <label class="option"><input type="radio" name="q23" value="D"> D) Their physical location</label>
+                </div>
+                <div class="confidence">
+                    <label>Confidence:</label>
+                    <input type="range" name="c23" min="1" max="5" value="3">
+                    <span class="confidence-value">3</span>
+                </div>
+            </div>
+
+            <div class="question">
+                <div class="question-num">Question 24</div>
+                <div class="question-text">What is the PRIMARY purpose of Kerberos?</div>
+                <div class="options">
+                    <label class="option"><input type="radio" name="q24" value="A"> A) Certificate management</label>
+                    <label class="option"><input type="radio" name="q24" value="B"> B) Single sign-on authentication using tickets</label>
+                    <label class="option"><input type="radio" name="q24" value="C"> C) Password rotation</label>
+                    <label class="option"><input type="radio" name="q24" value="D"> D) Biometric storage</label>
+                </div>
+                <div class="confidence">
+                    <label>Confidence:</label>
+                    <input type="range" name="c24" min="1" max="5" value="3">
+                    <span class="confidence-value">3</span>
+                </div>
+            </div>
+
+            <div class="question">
+                <div class="question-num">Question 25</div>
+                <div class="question-text">What is the difference between authorization and authentication?</div>
+                <textarea name="q25" placeholder="Type your answer..."></textarea>
+                <div class="confidence">
+                    <label>Confidence:</label>
+                    <input type="range" name="c25" min="1" max="5" value="3">
+                    <span class="confidence-value">3</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Domain 6 -->
+        <div class="domain">
+            <h2>Domain 6: Security Assessment and Testing</h2>
+            
+            <div class="question">
+                <div class="question-num">Question 26</div>
+                <div class="question-text">What is the PRIMARY difference between a vulnerability assessment and a penetration test?</div>
+                <div class="options">
+                    <label class="option"><input type="radio" name="q26" value="A"> A) Vulnerability assessments are automated; penetration tests are manual</label>
+                    <label class="option"><input type="radio" name="q26" value="B"> B) Vulnerability assessments identify weaknesses; penetration tests exploit them</label>
+                    <label class="option"><input type="radio" name="q26" value="C"> C) Penetration tests are free; vulnerability assessments cost money</label>
+                    <label class="option"><input type="radio" name="q26" value="D"> D) They are the same thing</label>
+                </div>
+                <div class="confidence">
+                    <label>Confidence:</label>
+                    <input type="range" name="c26" min="1" max="5" value="3">
+                    <span class="confidence-value">3</span>
+                </div>
+            </div>
+
+            <div class="question">
+                <div class="question-num">Question 27</div>
+                <div class="question-text">Which type of testing involves testers with no prior knowledge of the system?</div>
+                <div class="options">
+                    <label class="option"><input type="radio" name="q27" value="A"> A) White box testing</label>
+                    <label class="option"><input type="radio" name="q27" value="B"> B) Gray box testing</label>
+                    <label class="option"><input type="radio" name="q27" value="C"> C) Black box testing</label>
+                    <label class="option"><input type="radio" name="q27" value="D"> D) Crystal box testing</label>
+                </div>
+                <div class="confidence">
+                    <label>Confidence:</label>
+                    <input type="range" name="c27" min="1" max="5" value="3">
+                    <span class="confidence-value">3</span>
+                </div>
+            </div>
+
+            <div class="question">
+                <div class="question-num">Question 28</div>
+                <div class="question-text">What is the PRIMARY purpose of a security audit?</div>
+                <div class="options">
+                    <label class="option"><input type="radio" name="q28" value="A"> A) To exploit vulnerabilities</label>
+                    <label class="option"><input type="radio" name="q28" value="B"> B) To verify compliance with policies and standards</label>
+                    <label class="option"><input type="radio" name="q28" value="C"> C) To develop new security controls</label>
+                    <label class="option"><input type="radio" name="q28" value="D"> D) To train employees</label>
+                </div>
+                <div class="confidence">
+                    <label>Confidence:</label>
+                    <input type="range" name="c28" min="1" max="5" value="3">
+                    <span class="confidence-value">3</span>
+                </div>
+            </div>
+
+            <div class="question">
+                <div class="question-num">Question 29</div>
+                <div class="question-text">How often should penetration testing occur according to best practices?</div>
+                <div class="options">
+                    <label class="option"><input type="radio" name="q29" value="A"> A) Only once</label>
+                    <label class="option"><input type="radio" name="q29" value="B"> B) Annually</label>
+                    <label class="option"><input type="radio" name="q29" value="C"> C) Daily</label>
+                    <label class="option"><input type="radio" name="q29" value="D"> D) Never; it's too risky</label>
+                </div>
+                <div class="confidence">
+                    <label>Confidence:</label>
+                    <input type="range" name="c29" min="1" max="5" value="3">
+                    <span class="confidence-value">3</span>
+                </div>
+            </div>
+
+            <div class="question">
+                <div class="question-num">Question 30</div>
+                <div class="question-text">What is the PRIMARY goal of regression testing after a security fix?</div>
+                <div class="options">
+                    <label class="option"><input type="radio" name="q30" value="A"> A) To identify new features</label>
+                    <label class="option"><input type="radio" name="q30" value="B"> B) To ensure the fix doesn't break existing functionality</label>
+                    <label class="option"><input type="radio" name="q30" value="C"> C) To speed up the system</label>
+                    <label class="option"><input type="radio" name="q30" value="D"> D) To document the vulnerability</label>
+                </div>
+                <div class="confidence">
+                    <label>Confidence:</label>
+                    <input type="range" name="c30" min="1" max="5" value="3">
+                    <span class="confidence-value">3</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Domain 7 -->
+        <div class="domain">
+            <h2>Domain 7: Security Operations</h2>
+            
+            <div class="question">
+                <div class="question-num">Question 31</div>
+                <div class="question-text">What is the PRIMARY goal of incident response?</div>
+                <div class="options">
+                    <label class="option"><input type="radio" name="q31" value="A"> A) To punish the attacker</label>
+                    <label class="option"><input type="radio" name="q31" value="B"> B) To minimize damage and recover quickly</label>
+                    <label class="option"><input type="radio" name="q31" value="C"> C) To ignore the incident</label>
+                    <label class="option"><input type="radio" name="q31" value="D"> D) To increase system complexity</label>
+                </div>
+                <div class="confidence">
+                    <label>Confidence:</label>
+                    <input type="range" name="c31" min="1" max="5" value="3">
+                    <span class="confidence-value">3</span>
+                </div>
+            </div>
+
+            <div class="question">
+                <div class="question-num">Question 32</div>
+                <div class="question-text">What are the four phases of the incident response lifecycle?</div>
+                <textarea name="q32" placeholder="Type your answer..."></textarea>
+                <div class="confidence">
+                    <label>Confidence:</label>
+                    <input type="range" name="c32" min="1" max="5" value="3">
+                    <span class="confidence-value">3</span>
+                </div>
+            </div>
+
+            <div class="question">
+                <div class="question-num">Question 33</div>
+                <div class="question-text">What is the difference between a security event and a security incident?</div>
+                <textarea name="q33" placeholder="Type your answer..."></textarea>
+                <div class="confidence">
+                    <label>Confidence:</label>
+                    <input type="range" name="c33" min="1" max="5" value="3">
+                    <span class="confidence-value">3</span>
+                </div>
+            </div>
+
+            <div class="question">
+                <div class="question-num">Question 34</div>
+                <div class="question-text">What is the PRIMARY purpose of a Security Operations Center (SOC)?</div>
+                <div class="options">
+                    <label class="option"><input type="radio" name="q34" value="A"> A) To develop security policies</label>
+                    <label class="option"><input type="radio" name="q34" value="B"> B) To monitor, detect, and respond to security incidents</label>
+                    <label class="option"><input type="radio" name="q34" value="C"> C) To hire security personnel</label>
+                    <label class="option"><input type="radio" name="q34" value="D"> D) To purchase security tools</label>
+                </div>
+                <div class="confidence">
+                    <label>Confidence:</label>
+                    <input type="range" name="c34" min="1" max="5" value="3">
+                    <span class="confidence-value">3</span>
+                </div>
+            </div>
+
+            <div class="question">
+                <div class="question-num">Question 35</div>
+                <div class="question-text">What is the PRIMARY benefit of continuous monitoring?</div>
+                <div class="options">
+                    <label class="option"><input type="radio" name="q35" value="A"> A) Reduced storage costs</label>
+                    <label class="option"><input type="radio" name="q35" value="B"> B) Real-time detection of security anomalies</label>
+                    <label class="option"><input type="radio" name="q35" value="C"> C) Elimination of all threats</label>
+                    <label class="option"><input type="radio" name="q35" value="D"> D) Simplified compliance</label>
+                </div>
+                <div class="confidence">
+                    <label>Confidence:</label>
+                    <input type="range" name="c35" min="1" max="5" value="3">
+                    <span class="confidence-value">3</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Domain 8 -->
+        <div class="domain">
+            <h2>Domain 8: Software Development Security</h2>
+            
+            <div class="question">
+                <div class="question-num">Question 36</div>
+                <div class="question-text">What is the PRIMARY security concern with input validation?</div>
+                <div class="options">
+                    <label class="option"><input type="radio" name="q36" value="A"> A) Improved user experience</label>
+                    <label class="option"><input type="radio" name="q36" value="B"> B) Prevention of injection attacks</label>
+                    <label class="option"><input type="radio" name="q36" value="C"> C) Faster application performance</label>
+                    <label class="option"><input type="radio" name="q36" value="D"> D) Reduced development time</label>
+                </div>
+                <div class="confidence">
+                    <label>Confidence:</label>
+                    <input type="range" name="c36" min="1" max="5" value="3">
+                    <span class="confidence-value">3</span>
+                </div>
+            </div>
+
+            <div class="question">
+                <div class="question-num">Question 37</div>
+                <div class="question-text">What is the PRIMARY goal of threat modeling in software development?</div>
+                <div class="options">
+                    <label class="option"><input type="radio" name="q37" value="A"> A) To create user interfaces</label>
+                    <label class="option"><input type="radio" name="q37" value="B"> B) To identify potential threats and mitigations early in the design phase</label>
+                    <label class="option"><input type="radio" name="q37" value="C"> C) To write code faster</label>
+                    <label class="option"><input type="radio" name="q37" value="D"> D) To skip testing</label>
+                </div>
+                <div class="confidence">
+                    <label>Confidence:</label>
+                    <input type="range" name="c37" min="1" max="5" value="3">
+                    <span class="confidence-value">3</span>
+                </div>
+            </div>
+
+            <div class="question">
+                <div class="question-num">Question 38</div>
+                <div class="question-text">Which SDLC model integrates security throughout all phases?</div>
+                <div class="options">
+                    <label class="option"><input type="radio" name="q38" value="A"> A) Waterfall</label>
+                    <label class="option"><input type="radio" name="q38" value="B"> B) Secure SDLC (SSDLC)</label>
+                    <label class="option"><input type="radio" name="q38" value="C"> C) Agile (without security focus)</label>
+                    <label class="option"><input type="radio" name="q38" value="D"> D) Spiral</label>
+                </div>
+                <div class="confidence">
+                    <label>Confidence:</label>
+                    <input type="range" name="c38" min="1" max="5" value="3">
+                    <span class="confidence-value">3</span>
+                </div>
+            </div>
+
+            <div class="question">
+                <div class="question-num">Question 39</div>
+                <div class="question-text">What is the PRIMARY difference between static and dynamic application security testing (SAST vs DAST)?</div>
+                <div class="options">
+                    <label class="option"><input type="radio" name="q39" value="A"> A) SAST tests running code; DAST tests source code</label>
+                    <label class="option"><input type="radio" name="q39" value="B"> B) SAST tests source code; DAST tests running applications</label>
+                    <label class="option"><input type="radio" name="q39" value="C"> C) They are identical</label>
+                    <label class="option"><input type="radio" name="q39" value="D"> D) SAST is manual; DAST is automated</label>
+                </div>
+                <div class="confidence">
+                    <label>Confidence:</label>
+                    <input type="range" name="c39" min="1" max="5" value="3">
+                    <span class="confidence-value">3</span>
+                </div>
+            </div>
+
+            <div class="question">
+                <div class="question-num">Question 40</div>
+                <div class="question-text">What is the PRIMARY purpose of code reviews from a security perspective?</div>
+                <div class="options">
+                    <label class="option"><input type="radio" name="q40" value="A"> A) To find bugs and security flaws before deployment</label>
+                    <label class="option"><input type="radio" name="q40" value="B"> B) To reduce developer salaries</label>
+                    <label class="option"><input type="radio" name="q40" value="C"> C) To eliminate the need for testing</label>
+                    <label class="option"><input type="radio" name="q40" value="D"> D) To make code longer</label>
+                </div>
+                <div class="confidence">
+                    <label>Confidence:</label>
+                    <input type="range" name="c40" min="1" max="5" value="3">
+                    <span class="confidence-value">3</span>
+                </div>
+            </div>
+        </div>
+
+        <div style="text-align: center; margin: 30px 0;">
+            <button type="submit" class="btn">Submit Assessment</button>
+        </div>
+    </form>
+
+    <div class="results" id="results">
+        <h3>📊 Assessment Results</h3>
+        <div id="summary"></div>
+        <div class="score-grid" id="scoreGrid"></div>
+        <div id="weakDomains"></div>
+    </div>
+
+    <script>
+        // Answer key
+        const answers = {
+            q1: 'B', q2: 'A', q3: 'D', q4: 'B', q5: 'B',
+            q6: 'B', q8: 'C', q9: 'B', q10: 'C',
+            q11: 'A', q12: 'B', q13: 'A', q14: 'B', q15: 'B',
+            q16: 'B', q17: 'B', q18: 'B', q19: 'B', q20: 'D',
+            q21: 'A', q22: 'B', q23: 'B', q24: 'B',
+            q26: 'B', q27: 'C', q28: 'B', q29: 'B', q30: 'B',
+            q31: 'B', q34: 'B', q35: 'B',
+            q36: 'B', q37: 'B', q38: 'B', q39: 'B', q40: 'A'
+        };
+
+        // Essay questions for manual review
+        const essayQuestions = ['q7', 'q25', 'q32', 'q33'];
+
+        // Update confidence display
+        document.querySelectorAll('input[type="range"]').forEach(slider => {
+            slider.addEventListener('input', (e) => {
+                e.target.nextElementSibling.textContent = e.target.value;
+            });
+        });
+
+        // Timer
+        let seconds = 0;
+        setInterval(() => {
+            seconds++;
+            const mins = Math.floor(seconds / 60).toString().padStart(2, '0');
+            const secs = (seconds % 60).toString().padStart(2, '0');
+            document.getElementById('timer').textContent = `${mins}:${secs}`;
+        }, 1000);
+
+        // Progress bar
+        function updateProgress() {
+            const total = 40;
+            const answered = document.querySelectorAll('input[type="radio"]:checked').length + 
+                           document.querySelectorAll('textarea').values().filter(t => t.value.trim()).length;
+            document.getElementById('progress').style.width = `${(answered / total) * 100}%`;
+        }
+        document.querySelectorAll('input[type="radio"]').forEach(r => r.addEventListener('change', updateProgress));
+        document.querySelectorAll('textarea').forEach(t => t.addEventListener('input', updateProgress));
+
+        // Form submission
+        document.getElementById('assessment').addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            let score = 0;
+            let total = 0;
+            const domainScores = {
+                1: { correct: 0, total: 5, confidence: [] },
+                2: { correct: 0, total: 5, confidence: [] },
+                3: { correct: 0, total: 5, confidence: [] },
+                4: { correct: 0, total: 5, confidence: [] },
+                5: { correct: 0, total: 5, confidence: [] },
+                6: { correct: 0, total: 5, confidence: [] },
+                7: { correct: 0, total: 5, confidence: [] },
+                8: { correct: 0, total: 5, confidence: [] }
+            };
+
+            const domainMap = {
+                1: [1,2,3,4,5], 2: [6,7,8,9,10], 3: [11,12,13,14,15],
+                4: [16,17,18,19,20], 5: [21,22,23,24,25], 6: [26,27,28,29,30],
+                7: [31,32,33,34,35], 8: [36,37,38,39,40]
+            };
+
+            const domainNames = {
+                1: 'Security & Risk Mgmt', 2: 'Asset Security', 3: 'Security Architecture',
+                4: 'Comm & Network', 5: 'IAM', 6: 'Assessment & Testing',
+                7: 'Security Operations', 8: 'Software Dev Security'
+            };
+
+            // Grade multiple choice
+            for (const [q, correct] of Object.entries(answers)) {
+                const selected = document.querySelector(`input[name="${q}"]:checked`);
+                const qNum = parseInt(q.slice(1));
+                const domain = Object.entries(domainMap).find(([d, qs]) => qs.includes(qNum))?.[0];
+                const confidence = parseInt(document.querySelector(`input[name="c${qNum}"]`)?.value || 3);
+                
+                domainScores[domain].confidence.push(confidence);
+                
+                if (selected) {
+                    total++;
+                    if (selected.value === correct) {
+                        score++;
+                        domainScores[domain].correct++;
+                        selected.parentElement.classList.add('correct');
+                    } else {
+                        selected.parentElement.classList.add('incorrect');
+                        // Show correct answer
+                        document.querySelector(`input[name="${q}"][value="${correct}"]`).parentElement.classList.add('correct');
+                    }
+                }
+            }
+
+            // Show results
+            const results = document.getElementById('results');
+            const summary = document.getElementById('summary');
+            const scoreGrid = document.getElementById('scoreGrid');
+            
+            const pct = Math.round((score / total) * 100);
+            summary.innerHTML = `<p style="font-size: 1.5em;">Overall Score: <strong>${score}/${total}</strong> (${pct}%)</p>
+                <p>Essay questions (7, 25, 32, 33) need manual review.</p>`;
+
+            // Domain breakdown
+            let weakDomains = [];
+            for (let d = 1; d <= 8; d++) {
+                const ds = domainScores[d];
+                const avgConf = ds.confidence.length ? (ds.confidence.reduce((a,b) => a+b, 0) / ds.confidence.length).toFixed(1) : 'N/A';
+                const dpct = Math.round((ds.correct / ds.total) * 100);
+                
+                if (dpct < 70) weakDomains.push(d);
+                
+                const item = document.createElement('div');
+                item.className = `score-item ${dpct < 70 ? 'weak' : dpct >= 80 ? 'strong' : ''}`;
+                item.innerHTML = `<span>${domainNames[d]}</span><span>${ds.correct}/${ds.total} (${dpct}%)</span>`;
+                scoreGrid.appendChild(item);
+            }
+
+            if (weakDomains.length) {
+                document.getElementById('weakDomains').innerHTML = `
+                    <div class="weak-domains">
+                        <strong>⚠️ Focus areas:</strong> ${weakDomains.map(d => domainNames[d]).join(', ')}
+                    </div>`;
+            }
+
+            results.style.display = 'block';
+            results.scrollIntoView({ behavior: 'smooth' });
+        });
+    </script>
+</body>
+</html>
