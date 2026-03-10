@@ -59,7 +59,7 @@ function checkHoneypot(req, res, next) {
   next();
 }
 
-app.post('/api/contact', checkRateLimit, checkHoneypot, async (req, res) => {
+app.post('/contact', checkRateLimit, checkHoneypot, async (req, res) => {
   const { name, email, company, subject, message } = req.body;
   
   // Validation
@@ -145,7 +145,7 @@ Reply to: ${email}
 });
 
 // Health check
-app.get('/api/health', (req, res) => {
+app.get('/health', (req, res) => {
   res.json({ status: 'ok' });
 });
 
