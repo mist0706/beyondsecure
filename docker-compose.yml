@@ -1,9 +1,42 @@
 version: '3.8'
 
 services:
-  beyondsecure:
-    build: .
-    container_name: beyondsecure
+  web:
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    container_name: beyondsecure-web
+    restart: unless-stopped
+    networks:
+      - beyondsecure-net
+
+  api:
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+    container_name: beyondsecure-api
+    restart: unless-stopped
+    environment:
+      - CONTACT_EMAIL=david@beyondsecure.se
+      - AGENTMAIL_API_KEY=${AGENTMAIL_API_KEY}
+      - AGENTMAIL_INBOX=contact@beyondsecure.se
+    networks:
+      - beyondsecure-net
+
+  nginx:
+    image: nginx:alpine
+    container_name: beyondsecure-nginx
     ports:
       - "8080:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - web
+      - api
     restart: unless-stopped
+    networks:
+      - beyondsecure-net
+
+networks:
+  beyondsecure-net:
+    driver: bridge

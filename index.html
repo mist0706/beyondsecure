@@ -95,8 +95,8 @@
                 <div class="about-content">
                     <div class="about-text">
                         <h3>David V. Larsson</h3>
-                        <p class="about-role">Deputy CISO | Security Consultant | Security Architect</p>
-                        <p>With over 15 years in cybersecurity, I've led security programs at organizations ranging from global enterprises to growing startups. Currently Deputy CISO at Aurobay, with previous roles at Capgemini and NTT Security.</p>
+                        <p class="about-role">CISO as a Service | Security Consultant | Security Architect</p>
+                        <p>With over 15 years in cybersecurity, I've led security programs at organizations ranging from global enterprises to growing startups. Previously Deputy CISO at Aurobay, Security Consultant at Capgemini, and Principal Engineer at NTT Security.</p>
                         <p>My approach is practical: I build security programs that work in the real world, not just on paper. I bridge the gap between technical controls and business objectives.</p>
                         <ul class="about-highlights">
                             <li>✓ ISO/IEC 27001 implementation expertise</li>
@@ -108,11 +108,12 @@
                     <div class="about-credentials">
                         <h4>Credentials</h4>
                         <ul>
-                            <li>Deputy CISO, Aurobay AB</li>
+                            <li>Lead Network Auditor, Volvo</li>
+                            <li>Former Deputy CISO, Aurobay AB</li>
                             <li>Security Consultant, Capgemini</li>
                             <li>Principal Engineer, NTT Security</li>
                             <li>SaltStack Certified Engineer</li>
-                            <li>Sedish Protective Security Act Class 2</li>
+                            <li>Swedish Protective Security Act Class 2</li>
                         </ul>
                     </div>
                 </div>
@@ -124,15 +125,42 @@
             <div class="container">
                 <h2>Get in Touch</h2>
                 <p>Ready to strengthen your security posture? Let's discuss how I can help.</p>
-                <div class="contact-options">
-                    <a href="mailto:david@beyondsecure.se" class="contact-item">
-                        <span class="contact-icon">📧</span>
-                        <span>david@beyondsecure.se</span>
-                    </a>
-                    <a href="https://www.linkedin.com/in/david-v-larsson" class="contact-item" target="_blank">
-                        <span class="contact-icon">🔗</span>
-                        <span>LinkedIn</span>
-                    </a>
+                <form id="contact-form" class="contact-form">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="name">Name *</label>
+                            <input type="text" id="name" name="name" required placeholder="Your name">
+                        </div>
+                        <div class="form-group">
+                            <label for="email">Email *</label>
+                            <input type="email" id="email" name="email" required placeholder="your@email.com">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="company">Company</label>
+                            <input type="text" id="company" name="company" placeholder="Your company">
+                        </div>
+                        <div class="form-group">
+                            <label for="subject">Subject</label>
+                            <input type="text" id="subject" name="subject" placeholder="How can I help?">
+                        </div>
+                    </div>
+                    <!-- Honeypot fields - hidden from users, trap for bots -->
+                    <input type="text" name="website" style="display:none" tabindex="-1" autocomplete="off">
+                    <input type="text" name="url" style="display:none" tabindex="-1" autocomplete="off">
+                    <div class="form-group">
+                        <label for="message">Message *</label>
+                        <textarea id="message" name="message" required placeholder="Tell me about your security needs..." rows="5"></textarea>
+                    </div>
+                    <button type="submit" class="btn-primary btn-submit">
+                        <span class="btn-text">Send Message</span>
+                        <span class="btn-loading" style="display:none">Sending...</span>
+                    </button>
+                    <div id="form-status" class="form-status"></div>
+                </form>
+                <div class="contact-alt">
+                    <p>Or connect on <a href="https://www.linkedin.com/in/david-v-larsson" target="_blank" rel="noopener">LinkedIn</a></p>
                 </div>
             </div>
         </section>
@@ -146,5 +174,59 @@
     </footer>
 
     <link rel="stylesheet" href="assets/css/style.css">
+    
+    <script>
+    document.getElementById('contact-form').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const form = this;
+        const btnText = form.querySelector('.btn-text');
+        const btnLoading = form.querySelector('.btn-loading');
+        const status = document.getElementById('form-status');
+        const submitBtn = form.querySelector('.btn-submit');
+        
+        // Get form data
+        const formData = {
+            name: form.name.value.trim(),
+            email: form.email.value.trim(),
+            company: form.company.value.trim(),
+            subject: form.subject.value.trim(),
+            message: form.message.value.trim()
+        };
+        
+        // Disable button and show loading
+        submitBtn.disabled = true;
+        btnText.style.display = 'none';
+        btnLoading.style.display = 'inline';
+        status.className = 'form-status';
+        status.textContent = '';
+        
+        try {
+            const response = await fetch('/api/contact', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(formData)
+            });
+            
+            const data = await response.json();
+            
+            if (response.ok && data.success) {
+                status.className = 'form-status success';
+                status.textContent = data.message || 'Message sent successfully!';
+                form.reset();
+            } else {
+                status.className = 'form-status error';
+                status.textContent = data.error || 'Something went wrong. Please try again.';
+            }
+        } catch (error) {
+            status.className = 'form-status error';
+            status.textContent = 'Network error. Please check your connection and try again.';
+        } finally {
+            submitBtn.disabled = false;
+            btnText.style.display = 'inline';
+            btnLoading.style.display = 'none';
+        }
+    });
+    </script>
 </body>
 </html>
