@@ -6,6 +6,8 @@
     <meta name="description" content="BeyondSecure - CISO as a Service, Security Consulting, GRC. Expert cybersecurity guidance for SMBs.">
     <title>BeyondSecure | Cybersecurity Consulting & CISO as a Service</title>
     <link rel="stylesheet" href="assets/css/style.css">
+    <!-- Cloudflare Turnstile -->
+    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 </head>
 <body>
     <header>
@@ -149,6 +151,8 @@
                     <!-- Honeypot fields - hidden from users, trap for bots -->
                     <input type="text" name="website" style="display:none" tabindex="-1" autocomplete="off">
                     <input type="text" name="url" style="display:none" tabindex="-1" autocomplete="off">
+                    <!-- Cloudflare Turnstile CAPTCHA -->
+                    <div class="cf-turnstile" data-sitekey="0x4AAAAAACp0oKTRwZ1yIFgo" data-theme="light"></div>
                     <div class="form-group">
                         <label for="message">Message *</label>
                         <textarea id="message" name="message" required placeholder="Tell me about your security needs..." rows="5"></textarea>
@@ -191,7 +195,8 @@
             email: form.email.value.trim(),
             company: form.company.value.trim(),
             subject: form.subject.value.trim(),
-            message: form.message.value.trim()
+            message: form.message.value.trim(),
+            'cf-turnstile-response': turnstile?.getResponse?.()
         };
         
         // Disable button and show loading

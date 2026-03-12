@@ -59,8 +59,46 @@ function checkHoneypot(req, res, next) {
   next();
 }
 
+// Cloudflare Turnstile verification
+const TURNSTILE_SECRET_KEY = process.env.TURNSTILE_SECRET_KEY;
+
+async function verifyTurnstile(token, ip) {
+  if (!TURNSTILE_SECRET_KEY) {
+    console.warn('TURNSTILE_SECRET_KEY not set - skipping Turnstile verification');
+    return true; // Skip if not configured
+  }
+  
+  if (!token) {
+    return false;
+  }
+  
+  try {
+    const response = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: `secret=${encodeURIComponent(TURNSTILE_SECRET_KEY)}&response=${encodeURIComponent(token)}&remoteip=${encodeURIComponent(ip || '')}`
+    });
+    
+    const data = await response.json();
+    return data.success === true;
+  } catch (error) {
+    console.error('Turnstile verification error:', error);
+    return false;
+  }
+}
+
 app.post('/contact', checkRateLimit, checkHoneypot, async (req, res) => {
   const { name, email, company, subject, message } = req.body;
+  const turnstileToken = req.body['cf-turnstile-response'];
+  const ip = req.ip || req.connection.remoteAddress || '';
+  
+  // Verify Turnstile
+  const turnstileValid = await verifyTurnstile(turnstileToken, ip);
+  if (!turnstileValid) {
+    return res.status(400).json({ 
+      error: 'Security verification failed. Please try again.' 
+    });
+  }
   
   // Validation
   if (!name || !email || !message) {

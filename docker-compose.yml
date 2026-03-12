@@ -20,6 +20,7 @@ services:
       - CONTACT_EMAIL=david@beyondsecure.se
       - AGENTMAIL_API_KEY=${AGENTMAIL_API_KEY}
       - AGENTMAIL_INBOX=contact@beyondsecure.se
+      - TURNSTILE_SECRET_KEY=${TURNSTILE_SECRET_KEY}
     networks:
       - beyondsecure-net
 
